@@ -30,7 +30,7 @@ optional arguments:
 E.g. run on local host with sample data
 ```
 cd /path/to/item-restapi
-python3 -m item.main --data-file resources/
+python3 -m item.main --data-file resources/sample.json
 ```
 E.g. run server on custom ip and port
 ```
