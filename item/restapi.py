@@ -1,5 +1,3 @@
-import aiohttp
-import asyncio
 import logging
 
 from aiohttp import web
@@ -60,6 +58,7 @@ class ItemServer:
         self.app.router.add_get("/api/v1/test", self.test)
         self.app.router.add_get("/api/v1/account/{account_id}", self.get_account)
         self.app.router.add_get("/api/v1/accounts", self.get_accounts)
+        self.app.router.add_get("/api/v1/accounts/", self.get_accounts)
         self.app.router.add_get("/api/v1/accounts/{number}", self.get_accounts)
         self.app.router.add_post("/api/v1/accounts/add", self.add_contact)
         self.app.router.add_put("/api/v1/accounts/edit/{account_id}", self.edit_contact)
@@ -69,7 +68,7 @@ class ItemServer:
         """
         Generates a json response.
         Attempts to mimic JSON-RPC like response by having an id and result field.
-        'id' in json-rpc this is set by sender/client but here we will have the
+        'id' in json-rpc this is set by sender/client but here we will have the server do it
         'result' True if request was successful, False otherwise
         'message' additional information
         'data' json data
@@ -125,7 +124,6 @@ class ItemServer:
         id = self.id
         sorted_data = sorted(self.accounts.values(), key=lambda x: x["name"])
         number = int(request.match_info.get("number", 0))
-        LOGGER.info(f"get_accounts: {number}")
 
         LOGGER.info(f"get_accounts: {number}")
         if number and number < len(sorted_data):
@@ -155,6 +153,7 @@ class ItemServer:
                 return web.json_response(self._generate_resp(id, False, f"Missing field '{key}', no value found."))
             new_account[key] = value
         self.accounts[str(account_id)] = new_account
+        return web.json_response(self._generate_resp(id, True, f"Account {key} added successfully"))
 
     async def delete_contact(self, request):
         id = self.id
