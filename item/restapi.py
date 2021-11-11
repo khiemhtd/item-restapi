@@ -84,7 +84,7 @@ class ItemServer:
         self.message_id += 1
         return id
 
-    async def _validate_account_id(self, account_id):
+    async def _validate_account_id(self, id, account_id):
         """
         Checks and validates provided account id.
         :param account_id: target account id (str or int) to be validated
@@ -114,7 +114,7 @@ class ItemServer:
             return web.json_response(self._generate_resp(id, False, f"Account {account_id} doesn't exist"))
 
         # Validate account id:
-        resp = await self._validate_account_id(account_id)
+        resp = await self._validate_account_id(id, account_id)
         if resp:
             return resp
 
@@ -123,7 +123,11 @@ class ItemServer:
     async def get_accounts(self, request):
         id = self.id
         sorted_data = sorted(self.accounts.values(), key=lambda x: x["name"])
-        number = int(request.match_info.get("number", 0))
+        number = request.match_info.get("number", 0)
+        try:
+            number = int(number)
+        except ValueError:
+            return web.json_response(self._generate_resp(id, False, f"Invalid integer n provided: {number}"))
 
         LOGGER.info(f"get_accounts: {number}")
         if number and number < len(sorted_data):
@@ -137,7 +141,7 @@ class ItemServer:
         LOGGER.info(f"add_contact: {account_id}")
 
         # Validate account id:
-        resp = await self._validate_account_id(account_id)
+        resp = await self._validate_account_id(id, account_id)
         if resp:
             return resp
 
@@ -161,7 +165,7 @@ class ItemServer:
         LOGGER.info(f"delete_account: {account_id}")
 
         # Validate account id:
-        resp = await self._validate_account_id(account_id)
+        resp = await self._validate_account_id(id, account_id)
         if resp:
             return resp
 
@@ -175,12 +179,13 @@ class ItemServer:
         return web.json_response(self._generate_resp(id, True, f"Account {account_id} successfully deleted"))
 
     async def edit_contact(self, request):
+        id = self.id
         data = await request.json()
         account_id = str(request.match_info.get("account_id", None))
         LOGGER.info(f"edit_account: {account_id}")
 
         # Validate account id:
-        resp = await self._validate_account_id(account_id)
+        resp = await self._validate_account_id(id, account_id)
         if resp:
             return resp
 
