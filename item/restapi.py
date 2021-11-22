@@ -157,7 +157,7 @@ class ItemServer:
                 return web.json_response(self._generate_resp(id, False, f"Missing field '{key}', no value found."))
             new_account[key] = value
         self.accounts[str(account_id)] = new_account
-        return web.json_response(self._generate_resp(id, True, f"Account {key} added successfully"))
+        return web.json_response(self._generate_resp(id, True, f"Account {account_id} added successfully"))
 
     async def delete_contact(self, request):
         id = self.id
@@ -211,7 +211,8 @@ class ItemServer:
 
     async def test(self, request):
         LOGGER.info("test")
-        return web.Response(text="Hello world, connection successful")
+        id = self.id
+        return web.json_response(self._generate_resp(id, True, "Connection successful"))
 
     def run(self):
         web.run_app(self.app, host=self.host, port=self.port)
